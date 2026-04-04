@@ -1,4 +1,4 @@
-# Pranav Sharma — Vexoo Labs AI Engineer Assignment
+# Pyramid RAG Engine
 
 A three-part system covering document ingestion with hierarchical retrieval, LLM fine-tuning for math reasoning, and a plug-and-play query routing architecture.
 
@@ -6,7 +6,7 @@ A three-part system covering document ingestion with hierarchical retrieval, LLM
 
 ## What This Is
 
-The core problem this assignment addresses is a real one: **how do you make a large document queryable without an LLM API call on every request?** The answer this implementation takes is to process the document once upfront — breaking it into chunks, enriching each chunk with summaries, categories, and keywords — and then retrieval becomes a fast similarity lookup rather than an expensive generation step.
+The core problem this project addresses is a real one: **how do you make a large document queryable without an LLM API call on every request?** The answer this implementation takes is to process the document once upfront — breaking it into chunks, enriching each chunk with summaries, categories, and keywords — and then retrieval becomes a fast similarity lookup rather than an expensive generation step.
 
 The three components aren't arbitrary:
 - **Part 1** (Document Pipeline + RAG) demonstrates retrieval system design
