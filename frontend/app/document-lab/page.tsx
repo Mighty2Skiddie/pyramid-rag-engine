@@ -147,8 +147,8 @@ export default function DocumentLabPage() {
               Upload Document
             </h2>
             <textarea
-              className="w-full h-40 rounded-xl p-4 text-sm text-gray-300 resize-none outline-none focus:ring-2"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", focusRingColor: "#3b82f6" }}
+              className="w-full h-40 rounded-xl p-4 text-sm text-gray-300 resize-none outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
               placeholder="Paste document text here..."
               value={text}
               onChange={(e) => setText(e.target.value)}
