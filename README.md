@@ -1,5 +1,7 @@
 # Pyramid RAG Engine
 
+**🚀 Live Demo**: [pyramid-rag-engine.vercel.app](https://pyramid-rag-engine-1l44tuzqq-mighty2skiddies-projects.vercel.app/)
+
 A three-part system covering document ingestion with hierarchical retrieval, LLM fine-tuning for math reasoning, and a plug-and-play query routing architecture.
 
 ---
