@@ -7,6 +7,9 @@ Wraps the existing Part 1 Python modules as REST endpoints.
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from typing import Optional, List
+import os
+import shutil
+import tempfile
 
 from part1_document_pipeline.input_layer import load_document
 from part1_document_pipeline.chunker import chunk_document
@@ -108,18 +111,54 @@ async def ingest_file(file: UploadFile = File(...)):
     """
     Accept a .txt or .pdf file upload and build the pyramid.
     """
-    if file.size and file.size > 500_000:
-        raise HTTPException(status_code=413, detail="File too large. Max 500KB.")
+    if file.size and file.size > 5_000_000:
+        raise HTTPException(status_code=413, detail="File too large. Max 5MB.")
 
-    content = await file.read()
-    text = content.decode("utf-8", errors="replace")
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    
+    fd, temp_path = tempfile.mkstemp(suffix=ext)
+    try:
+        with os.fdopen(fd, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+        
+        doc = load_document(temp_path)
+        if doc.char_count < 10:
+            raise HTTPException(status_code=400, detail="File is empty or too short.")
+            
+        chunks = chunk_document(doc, config.chunker)
+        pyramid_index = build_pyramid(chunks, config.pyramid)
 
-    if len(text.strip()) < 10:
-        raise HTTPException(status_code=400, detail="File is empty or too short.")
+        chunk_summaries = []
+        for chunk in chunks:
+            node = pyramid_index.get(chunk.chunk_id)
+            if node:
+                chunk_summaries.append(ChunkSummary(
+                    chunk_id=chunk.chunk_id,
+                    raw_text=node.raw_text[:500],
+                    summary=node.summary,
+                    category=node.category,
+                    category_confidence=node.category_confidence,
+                    keywords=node.keywords[:10],
+                ))
 
-    # Reuse the text ingestion logic
-    req = IngestTextRequest(text=text)
-    return await ingest_document(req)
+        metadata = {
+            "doc_id": doc.doc_id,
+            "char_count": doc.char_count,
+            "token_count": doc.token_count,
+        }
+
+        session_id = store.create(pyramid_index, chunks, metadata)
+
+        return IngestResponse(
+            session_id=session_id,
+            chunk_count=len(chunks),
+            chunks=chunk_summaries,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
 
 @router.post("/query", response_model=QueryResponse)

@@ -115,9 +115,19 @@ export default function DocumentLabPage() {
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const content = await file.text();
-    setText(content);
-    await handleIngest(content);
+    setLoading("ingesting");
+    setError("");
+    setSession(null);
+    setResults([]);
+    try {
+      const res = await api.ingestFile(file);
+      setSession(res);
+      setText(`[Uploaded file: ${file.name}]`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to ingest file.");
+    } finally {
+      setLoading(null);
+    }
   };
 
   const levelBarColors: Record<string, string> = {

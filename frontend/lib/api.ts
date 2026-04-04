@@ -61,6 +61,20 @@ export const api = {
       body: JSON.stringify({ text }),
     }),
 
+  ingestFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE}/api/pyramid/ingest-file`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail ?? "API error");
+    }
+    return res.json() as Promise<IngestResponse>;
+  },
+
   queryPyramid: (session_id: string, query: string) =>
     apiFetch<QueryResponse>("/api/pyramid/query", {
       method: "POST",
